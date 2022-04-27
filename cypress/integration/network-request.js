@@ -1,6 +1,7 @@
 /// <reference types="cypress" />
 
 describe('Network Request', () => {
+    let message = "Unable to find comments"
     beforeEach(() => {
         cy.visit('https://example.cypress.io/commands/network-requests')
     })
@@ -56,4 +57,20 @@ describe('Network Request', () => {
 
 
     })
+    it.only("Put Request", () => {
+        cy.intercept({
+            method: 'PUT',
+            url: '**/comments/*'
+        },
+            {
+                statusCode: 404,
+                body: { error: message },
+                delay: 500
+                // This alias includes the response body and status code of the intercepted request
+            }).as("putComment");
+        cy.get('.network-put').click();
+        cy.wait("@putComment").its('response.statusCode').should('eq', 404);
+        cy.get(".network-put-comment").should('contain', message);
+
+})
 })
